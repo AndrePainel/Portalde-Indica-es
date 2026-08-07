@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal de Indicações — P&amp;B Data Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0E2A4A;
+    --navy-deep:#081b32;
+    --teal:#12877A;
+    --teal-light:#E4F3F1;
+    --gold:#C9A24B;
+    --gold-light:#FBF3E3;
+    --bg:#F5F6F4;
+    --surface:#FFFFFF;
+    --ink:#10202E;
+    --muted:#5B6B74;
+    --line:#E4E7E5;
+    --danger:#B4463C;
+    --danger-light:#FBEAE8;
+    --ok:#2E7D46;
+    --radius:12px;
+    --shadow: 0 1px 2px rgba(14,42,74,0.06), 0 8px 24px rgba(14,42,74,0.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{font-family:'Sora',sans-serif;}
+  #app{min-height:100vh;display:flex;flex-direction:column;}
+  ::selection{background:var(--gold-light);}
+
+  .topbar{
+    background:var(--navy);
+    background-image:
+      radial-gradient(circle at 8% 30%, rgba(201,162,75,0.18) 0, transparent 45%),
+      radial-gradient(circle at 92% 70%, rgba(18,135,122,0.28) 0, transparent 50%);
+    color:#fff;
+    padding:20px 28px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:relative;
+    overflow:hidden;
+  }
+  .topbar svg.net{position:absolute;inset:0;width:100%;height:100%;opacity:0.35;pointer-events:none;}
+  .brand{display:flex;align-items:center;gap:10px;position:relative;z-index:1;}
+  .brand-mark{
+    min-width:40px;height:34px;padding:0 6px;border-radius:9px;
+    background:linear-gradient(135deg,var(--teal),var(--gold));
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Sora',sans-serif;font-weight:800;color:var(--navy-deep);font-size:12.5px;letter-spacing:0.2px;
+  }
+  .brand-text{line-height:1.1;}
+  .brand-text .name{font-weight:700;font-size:15px;letter-spacing:0.2px;}
+  .brand-text .sub{font-size:11.5px;color:rgba(255,255,255,0.6);letter-spacing:0.4px;text-transform:uppercase;}
+  .topbar-right{display:flex;align-items:center;gap:14px;position:relative;z-index:1;}
+  .who{font-size:13px;color:rgba(255,255,255,0.85);}
+  .who b{color:#fff;font-weight:600;}
+  .linklike{
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.16);
+    color:#fff;font-size:12.5px;padding:7px 13px;border-radius:8px;cursor:pointer;
+    font-family:'Inter',sans-serif;font-weight:500;transition:background .15s;
+  }
+  .linklike:hover{background:rgba(255,255,255,0.16);}
+  .sync{font-size:11.5px;color:rgba(255,255,255,0.65);display:flex;align-items:center;gap:6px;}
+  .sync .dot{width:7px;height:7px;border-radius:50%;background:#6b6b8a;transition:background .3s;}
+  .sync .dot.ok{background:#5BC98A;}
+  .sync .dot.saving{background:var(--gold);}
+  .sync .dot.err{background:#E24B4A;}
+
+  main{flex:1;width:100%;max-width:1040px;margin:0 auto;padding:36px 24px 60px;}
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+  }
+  .muted{color:var(--muted);}
+  label{
+    display:block;font-size:12.5px;font-weight:600;color:var(--navy);
+    margin-bottom:6px;letter-spacing:0.1px;
+  }
+  input,select{
+    width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:9px;
+    font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);background:#fff;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  input:focus,select:focus{
+    outline:none;border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-light);
+  }
+  .field{margin-bottom:16px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:620px){.row2{grid-template-columns:1fr;}}
+  button.primary{
+    background:var(--teal);color:#fff;border:none;border-radius:9px;
+    padding:12px 20px;font-family:'Inter',sans-serif;font-weight:600;font-size:14px;
+    cursor:pointer;transition:background .15s, transform .1s;
+  }
+  button.primary:hover{background:#0e7267;}
+  button.primary:active{transform:scale(0.98);}
+  button.primary:disabled{background:#9fb9b5;cursor:not-allowed;}
+  button.ghost{
+    background:transparent;color:var(--navy);border:1.5px solid var(--line);border-radius:9px;
+    padding:11px 18px;font-family:'Inter',sans-serif;font-weight:600;font-size:13.5px;cursor:pointer;
+  }
+  button.ghost:hover{border-color:var(--navy);}
+  .err{
+    background:var(--danger-light);color:var(--danger);border:1px solid #f0cac6;
+    border-radius:8px;padding:10px 13px;font-size:13px;margin-bottom:14px;
+  }
+  .badge{
+    display:inline-flex;align-items:center;gap:5px;
+    padding:4px 10px;border-radius:100px;font-size:11.5px;font-weight:600;letter-spacing:0.2px;
+  }
+  .badge.novo{background:var(--teal-light);color:var(--teal);}
+  .badge.contato{background:var(--gold-light);color:#8a6a24;}
+  .badge.convertido{background:#E5F3E7;color:#2E7D46;}
+  .badge.perdido{background:var(--danger-light);color:var(--danger);}
+
+  .login-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .login-card{width:100%;max-width:420px;padding:36px 32px;}
+  .login-card h1{font-size:21px;margin:0 0 4px;color:var(--navy);}
+  .login-card p.lead{font-size:13.5px;color:var(--muted);margin:0 0 26px;}
+
+  .page-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+  .page-head h1{font-size:24px;margin:0 0 4px;color:var(--navy);}
+  .page-head p{margin:0;color:var(--muted);font-size:13.5px;}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+  @media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr);}}
+  .stat{padding:16px 18px;}
+  .stat .num{font-family:'Sora',sans-serif;font-size:26px;font-weight:700;color:var(--navy);line-height:1;}
+  .stat .lbl{font-size:12px;color:var(--muted);margin-top:6px;}
+
+  .section-title{font-size:15px;font-weight:700;color:var(--navy);margin:0 0 14px;font-family:'Sora',sans-serif;}
+  .form-card{padding:24px;margin-bottom:32px;}
+
+  .indic-list{display:flex;flex-direction:column;gap:10px;}
+  .indic-row{padding:16px 18px;display:grid;grid-template-columns:1.6fr 0.8fr 1fr 0.9fr;gap:14px;align-items:center;}
+  @media(max-width:760px){.indic-row{grid-template-columns:1fr;gap:8px;}}
+  .indic-row .empresa{font-weight:700;color:var(--navy);font-size:14.5px;}
+  .indic-row .meta{font-size:12.5px;color:var(--muted);margin-top:2px;}
+  .indic-row .contatos{font-size:12.5px;color:var(--ink);line-height:1.5;}
+  .indic-row .contatos span{display:block;color:var(--muted);}
+  .empty{text-align:center;padding:44px 20px;color:var(--muted);font-size:13.5px;}
+  .empty b{display:block;color:var(--navy);font-size:15px;margin-bottom:4px;font-family:'Sora',sans-serif;}
+
+  .loading{padding:60px 20px;text-align:center;color:var(--muted);font-size:13.5px;}
+  .spin{width:22px;height:22px;border:2.5px solid var(--line);border-top-color:var(--teal);border-radius:50%;margin:0 auto 12px;animation:sp 0.8s linear infinite;}
+  @keyframes sp{to{transform:rotate(360deg);}}
+
+  .filters{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+  .filters select{width:auto;min-width:170px;}
+  table.admin-table{width:100%;border-collapse:collapse;font-size:13px;}
+  table.admin-table th{text-align:left;padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:0.4px;color:var(--muted);border-bottom:1.5px solid var(--line);font-weight:700;}
+  table.admin-table td{padding:12px;border-bottom:1px solid var(--line);vertical-align:top;}
+  table.admin-table tr:last-child td{border-bottom:none;}
+  table.admin-table .empresa{font-weight:700;color:var(--navy);}
+  .status-select{padding:6px 8px;font-size:12px;border-radius:7px;}
+  .admin-gate{max-width:380px;margin:60px auto;padding:32px;}
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+    background:var(--navy);color:#fff;padding:11px 20px;border-radius:9px;font-size:13.5px;
+    box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .25s, transform .25s;z-index:50;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px);}
+  footer.notice{text-align:center;padding:18px;font-size:11.5px;color:#9aa7ac;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, onSnapshot, addDoc, updateDoc, doc, serverTimestamp, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// Mesmo projeto Firebase já usado no Painel de Demandas — coleção separada ("indicacoes"),
+// não mexe em nada do painel existente.
+const firebaseConfig = {
+  apiKey: "AIzaSyAJIZKxsrv_AQtd140IIOl1YI8FdG94bcQ",
+  authDomain: "painel-de-controle-de-demanda.firebaseapp.com",
+  projectId: "painel-de-controle-de-demanda",
+  storageBucket: "painel-de-controle-de-demanda.firebasestorage.app",
+  messagingSenderId: "967196235787",
+  appId: "1:967196235787:web:a5d20cf9e9116c5880cf0e"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+const colRef = collection(db, 'indicacoes');
+
+const STATES = ["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"];
+const PORTE_OPTIONS = [
+  {v:"pequena", l:"Pequena — até 10 funcionários"},
+  {v:"media", l:"Média — 11 a 100 funcionários"},
+  {v:"grande", l:"Grande — mais de 100 funcionários"}
+];
+const STATUS_LABELS = {novo:"Novo", contato:"Em contato", convertido:"Convertido", perdido:"Não convertido"};
+const ADMIN_PASSCODE = "Andressa1817@"; // altere aqui se quiser trocar a senha do painel do gestor
+
+let state = {
+  screen: 'login', // login | dashboard | admin-gate | admin
+  user: null,
+  indicacoes: [],   // sempre reflete o Firestore em tempo real
+  syncState: 'saving', syncLabel: 'Conectando...',
+  loadingAction: false,
+  loginError: '', formError: '', adminError: '', toast: '',
+  adminFilterConsultora: 'todas', adminFilterStatus: 'todos'
+};
+
+const app = document.getElementById('app');
+
+function showToast(msg){ state.toast = msg; render(); setTimeout(()=>{ state.toast=''; render(); }, 2400); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function setSync(st, label){ state.syncState = st; state.syncLabel = label; render(); }
+
+// -------- Firestore em tempo real --------
+const q = query(colRef, orderBy('createdAt', 'desc'));
+onSnapshot(q, (snapshot) => {
+  state.indicacoes = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  setSync('ok', 'Sincronizado');
+}, (error) => {
+  console.error('Firestore onSnapshot error:', error);
+  setSync('err', 'Erro de conexão');
+});
+
+async function addIndicacaoRemote(data){
+  setSync('saving', 'Salvando...');
+  await addDoc(colRef, { ...data, status: 'novo', createdAt: serverTimestamp() });
+  setSync('ok', 'Sincronizado');
+}
+async function updateStatusRemote(docId, status){
+  setSync('saving', 'Salvando...');
+  await updateDoc(doc(db, 'indicacoes', docId), { status });
+  setSync('ok', 'Sincronizado');
+}
+async function updateValorRemote(docId, valor){
+  setSync('saving', 'Salvando...');
+  await updateDoc(doc(db, 'indicacoes', docId), { valorReceber: valor });
+  setSync('ok', 'Sincronizado');
+}
+
+function netSvg(){
+  return `<svg class="net" viewBox="0 0 600 140" preserveAspectRatio="none">
+    <g stroke="#ffffff" stroke-width="1" opacity="0.5">
+      <line x1="40" y1="30" x2="150" y2="80"/><line x1="150" y1="80" x2="270" y2="40"/>
+      <line x1="150" y1="80" x2="220" y2="120"/><line x1="270" y1="40" x2="380" y2="90"/>
+      <line x1="380" y1="90" x2="480" y2="45"/><line x1="380" y1="90" x2="470" y2="120"/>
+      <line x1="480" y1="45" x2="570" y2="70"/>
+    </g>
+    <g fill="#C9A24B"><circle cx="40" cy="30" r="3"/><circle cx="270" cy="40" r="3"/><circle cx="480" cy="45" r="3"/></g>
+    <g fill="#12877A"><circle cx="150" cy="80" r="4"/><circle cx="380" cy="90" r="4"/><circle cx="220" cy="120" r="3"/><circle cx="470" cy="120" r="3"/><circle cx="570" cy="70" r="3"/></g>
+  </svg>`;
+}
+
+function topbar(){
+  const dotClass = state.syncState==='ok'?'ok':state.syncState==='saving'?'saving':'err';
+  const syncHtml = `<div class="sync"><div class="dot ${dotClass}"></div><span>${esc(state.syncLabel)}</span></div>`;
+  const who = state.user
+    ? `<div class="topbar-right">${syncHtml}<span class="who">Olá, <b>${esc(state.user.nome)}</b></span><button class="linklike" onclick="handleLogout()">Sair</button></div>`
+    : `<div class="topbar-right">${syncHtml}<button class="linklike" onclick="goAdminGate()">Painel do gestor</button></div>`;
+  return `
+  <div class="topbar">
+    ${netSvg()}
+    <div class="brand">
+      <div class="brand-mark">P&amp;B</div>
+      <div class="brand-text"><div class="name">P&amp;B Data Intelligence</div><div class="sub">Portal de Indicações</div></div>
+    </div>
+    ${who}
+  </div>`;
+}
+
+function render(){
+  let body = '';
+  if(state.screen === 'login') body = loginScreen();
+  else if(state.screen === 'dashboard') body = dashboardScreen();
+  else if(state.screen === 'admin-gate') body = adminGateScreen();
+  else if(state.screen === 'admin') body = adminScreen();
+
+  app.innerHTML = `
+    ${topbar()}
+    <main>${body}</main>
+    <footer class="notice">Identificação por e-mail, sem senha — cada indicação fica associada ao e-mail informado e sincronizada em tempo real.</footer>
+    <div class="toast ${state.toast ? 'show':''}">${esc(state.toast)}</div>
+  `;
+}
+
+/* ---------------- LOGIN ---------------- */
+function loginScreen(){
+  return `
+  <div class="login-wrap" style="padding-top:20px;">
+    <div class="card login-card">
+      <h1>Indique um cliente</h1>
+      <p class="lead">Informe seu nome e e-mail para acessar suas indicações. Você só verá as indicações que você mesma cadastrar.</p>
+      ${state.loginError ? `<div class="err">${esc(state.loginError)}</div>` : ''}
+      <div class="field"><label for="in-nome">Seu nome</label><input id="in-nome" type="text" placeholder="Ex: Mariana Souza" autocomplete="name"></div>
+      <div class="field"><label for="in-email">Seu e-mail</label><input id="in-email" type="email" placeholder="voce@empresa.com" autocomplete="email"></div>
+      <div class="field"><label for="in-pix">Sua chave PIX</label><input id="in-pix" type="text" placeholder="CPF, e-mail, telefone ou chave aleatória"></div>
+      <button class="primary" style="width:100%;" onclick="handleLogin()">Entrar</button>
+    </div>
+  </div>`;
+}
+
+window.handleLogin = function(){
+  const nome = document.getElementById('in-nome').value.trim();
+  const email = document.getElementById('in-email').value.trim().toLowerCase();
+  const pix = document.getElementById('in-pix').value.trim();
+  if(!nome){ state.loginError = 'Informe seu nome.'; render(); return; }
+  if(!email || !email.includes('@') || !email.includes('.')){ state.loginError = 'Informe um e-mail válido.'; render(); return; }
+  if(!pix){ state.loginError = 'Informe sua chave PIX.'; render(); return; }
+  state.user = {email, nome, pix};
+  state.loginError = '';
+  state.screen = 'dashboard';
+  render();
+};
+
+window.handleLogout = function(){
+  state.user = null;
+  state.screen = 'login';
+  render();
+};
+
+/* ---------------- DASHBOARD ---------------- */
+function dashboardScreen(){
+  const mine = state.indicacoes.filter(i => i.consultoraEmail === state.user.email);
+  const total = mine.length;
+  const convertidas = mine.filter(i=>i.status==='convertido').length;
+  const emContato = mine.filter(i=>i.status==='contato').length;
+  const novas = mine.filter(i=>i.status==='novo').length;
+
+  const listHtml = mine.length === 0
+    ? `<div class="card empty"><b>Nenhuma indicação ainda</b>Cadastre a primeira empresa que você quer indicar usando o formulário acima.</div>`
+    : `<div class="indic-list">${mine.map(rowHtml).join('')}</div>`;
+
+  return `
+  <div class="page-head">
+    <div><h1>Minhas indicações</h1><p>Cadastre empresas e acompanhe o andamento de cada uma.</p></div>
+  </div>
+
+  <div class="card" style="padding:14px 18px;margin-bottom:20px;background:var(--gold-light);border-color:#ecdcb4;">
+    <p style="margin:0;font-size:12.5px;color:#7a5f22;"><b>Regra de comissão:</b> 2% sobre o valor do contrato geral fechado, podendo variar de <b>R$ 1.200</b> a <b>R$ 2.500</b> conforme o valor do contrato.</p>
+  </div>
+
+  <div class="stats">
+    <div class="card stat"><div class="num">${total}</div><div class="lbl">Total indicado</div></div>
+    <div class="card stat"><div class="num">${novas}</div><div class="lbl">Novas</div></div>
+    <div class="card stat"><div class="num">${emContato}</div><div class="lbl">Em contato</div></div>
+    <div class="card stat"><div class="num">${convertidas}</div><div class="lbl">Convertidas</div></div>
+  </div>
+
+  <div class="card form-card">
+    <div class="section-title">Nova indicação</div>
+    <p class="muted" style="font-size:12.5px;margin:-8px 0 16px;">* campos obrigatórios — os demais podem ficar em aberto.</p>
+    ${state.formError ? `<div class="err">${esc(state.formError)}</div>` : ''}
+    <div class="row2">
+      <div class="field"><label>Nome da empresa indicada *</label><input id="f-empresa" type="text" placeholder="Ex: Clínica Boa Forma"></div>
+      <div class="field"><label>Estado</label><select id="f-estado"><option value="">Selecione</option>${STATES.map(s=>`<option value="${s}">${s}</option>`).join('')}</select></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Telefone de contato</label><input id="f-telefone" type="tel" placeholder="(11) 3000-0000"></div>
+      <div class="field"><label>WhatsApp *</label><input id="f-whatsapp" type="tel" placeholder="(11) 90000-0000"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>E-mail da empresa *</label><input id="f-email" type="email" placeholder="contato@empresa.com"></div>
+      <div class="field"><label>Tamanho da empresa</label><select id="f-porte"><option value="">Selecione</option>${PORTE_OPTIONS.map(p=>`<option value="${p.v}">${p.l}</option>`).join('')}</select></div>
+    </div>
+    <button class="primary" onclick="handleAddIndicacao()" ${state.loadingAction?'disabled':''}>${state.loadingAction ? 'Salvando…' : 'Cadastrar indicação'}</button>
+  </div>
+
+  <div class="section-title">Histórico</div>
+  ${listHtml}
+  `;
+}
+
+function rowHtml(i){
+  const badgeClass = {novo:'novo', contato:'contato', convertido:'convertido', perdido:'perdido'}[i.status] || 'novo';
+  let dateStr = '';
+  if(i.createdAt && i.createdAt.toDate) dateStr = i.createdAt.toDate().toLocaleDateString('pt-BR');
+  return `
+  <div class="card indic-row">
+    <div><div class="empresa">${esc(i.empresa)}</div><div class="meta">${esc(i.estado || '—')} · indicado em ${dateStr}</div></div>
+    <div><span class="badge ${badgeClass}">${STATUS_LABELS[i.status] || 'Novo'}</span>${i.valorReceber!=null ? `<div class="meta" style="margin-top:6px;color:var(--ok);font-weight:600;">R$ ${Number(i.valorReceber).toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>` : ''}</div>
+    <div class="contatos">${esc(i.telefone || '—')}<span>${esc(i.whatsapp ? 'WhatsApp: '+i.whatsapp : '')}</span></div>
+    <div class="meta">${esc(i.email || '—')}<br>${PORTE_OPTIONS.find(p=>p.v===i.porte)?.l.split('—')[0].trim() || ''}</div>
+  </div>`;
+}
+
+window.handleAddIndicacao = async function(){
+  const empresa = document.getElementById('f-empresa').value.trim();
+  const estado = document.getElementById('f-estado').value;
+  const telefone = document.getElementById('f-telefone').value.trim();
+  const whatsapp = document.getElementById('f-whatsapp').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const porte = document.getElementById('f-porte').value;
+
+  if(!empresa || !whatsapp || !email){
+    state.formError = 'Preencha nome da empresa, WhatsApp e e-mail antes de cadastrar.';
+    render(); return;
+  }
+
+  state.loadingAction = true; state.formError=''; render();
+  try{
+    await addIndicacaoRemote({
+      consultoraNome: state.user.nome, consultoraEmail: state.user.email, consultoraPix: state.user.pix,
+      empresa, estado, telefone, whatsapp, email, porte
+    });
+    showToast('Indicação cadastrada com sucesso.');
+  }catch(e){
+    console.error('Falha ao salvar indicação:', e);
+    state.formError = 'Não foi possível salvar agora. Tente novamente.';
+  }
+  state.loadingAction = false;
+  render();
+};
+
+/* ---------------- ADMIN ---------------- */
+window.goAdminGate = function(){ state.screen = 'admin-gate'; render(); };
+
+function adminGateScreen(){
+  return `
+  <div class="card admin-gate">
+    <h1 style="font-size:19px;margin:0 0 6px;color:var(--navy);">Painel do gestor</h1>
+    <p class="muted" style="font-size:13px;margin:0 0 20px;">Acesso restrito à visão consolidada de todas as indicações.</p>
+    ${state.adminError ? `<div class="err">${esc(state.adminError)}</div>` : ''}
+    <div class="field"><label>Senha</label><input id="admin-pass" type="password" placeholder="••••••••"></div>
+    <button class="primary" style="width:100%;" onclick="handleAdminLogin()">Entrar</button>
+    <div style="margin-top:14px;"><button class="ghost" style="width:100%;" onclick="backFromAdminGate()">Voltar</button></div>
+  </div>`;
+}
+
+window.backFromAdminGate = function(){ state.screen = state.user ? 'dashboard' : 'login'; render(); };
+
+window.handleAdminLogin = function(){
+  const pass = document.getElementById('admin-pass').value;
+  if(pass !== ADMIN_PASSCODE){ state.adminError = 'Senha incorreta.'; render(); return; }
+  state.adminError = '';
+  state.screen = 'admin';
+  render();
+};
+
+function adminScreen(){
+  const all = state.indicacoes;
+  const consultoraEmails = [...new Set(all.map(i=>i.consultoraEmail))];
+
+  let filtered = all;
+  if(state.adminFilterConsultora !== 'todas') filtered = filtered.filter(i=>i.consultoraEmail === state.adminFilterConsultora);
+  if(state.adminFilterStatus !== 'todos') filtered = filtered.filter(i=>i.status === state.adminFilterStatus);
+
+  const total = all.length;
+  const convertidas = all.filter(i=>i.status==='convertido').length;
+  const taxa = total ? Math.round((convertidas/total)*100) : 0;
+
+  const rows = filtered.map(i => {
+    let dateStr = '';
+    if(i.createdAt && i.createdAt.toDate) dateStr = i.createdAt.toDate().toLocaleDateString('pt-BR');
+    return `
+    <tr>
+      <td><div class="empresa">${esc(i.empresa)}</div><div class="muted" style="font-size:12px;">${esc(i.estado||'')} · ${PORTE_OPTIONS.find(p=>p.v===i.porte)?.l.split('—')[0].trim()||''}</div></td>
+      <td>${esc(i.consultoraNome)}<div class="muted" style="font-size:11.5px;">${esc(i.consultoraEmail)}</div></td>
+      <td>${esc(i.telefone||'—')}<div class="muted" style="font-size:11.5px;">${esc(i.whatsapp||'')}</div></td>
+      <td>${esc(i.email||'—')}</td>
+      <td style="font-size:12px;">${esc(i.consultoraPix||'—')}</td>
+      <td>${dateStr}</td>
+      <td><select class="status-select" onchange="handleStatusChange('${i.id}', this.value)">
+        ${Object.entries(STATUS_LABELS).map(([v,l])=>`<option value="${v}" ${i.status===v?'selected':''}>${l}</option>`).join('')}
+      </select></td>
+      <td>
+        <input type="number" step="0.01" min="0" class="status-select" style="width:100px;"
+          value="${i.valorReceber!=null ? i.valorReceber : ''}" placeholder="R$"
+          onchange="handleValorChange('${i.id}', this.value)">
+      </td>
+    </tr>`;
+  }).join('');
+
+  return `
+  <div class="page-head">
+    <div><h1>Painel do gestor</h1><p>Visão consolidada de todas as consultoras.</p></div>
+    <button class="ghost" onclick="backFromAdmin()">Voltar</button>
+  </div>
+
+  <div class="card" style="padding:14px 18px;margin-bottom:20px;background:var(--gold-light);border-color:#ecdcb4;">
+    <p style="margin:0;font-size:12.5px;color:#7a5f22;"><b>Regra de comissão:</b> 2% sobre o valor do contrato geral fechado, podendo variar de <b>R$ 1.200</b> a <b>R$ 2.500</b> conforme o valor do contrato. Lance o valor exato na coluna "Valor a receber" de cada indicação convertida.</p>
+  </div>
+
+  <div class="stats">
+    <div class="card stat"><div class="num">${total}</div><div class="lbl">Indicações no total</div></div>
+    <div class="card stat"><div class="num">${consultoraEmails.length}</div><div class="lbl">Consultoras ativas</div></div>
+    <div class="card stat"><div class="num">${convertidas}</div><div class="lbl">Convertidas</div></div>
+    <div class="card stat"><div class="num">${taxa}%</div><div class="lbl">Taxa de conversão</div></div>
+  </div>
+
+  <div class="filters">
+    <select onchange="setAdminFilterConsultora(this.value)">
+      <option value="todas">Todas as consultoras</option>
+      ${consultoraEmails.map(e=>{
+        const nome = all.find(i=>i.consultoraEmail===e)?.consultoraNome || e;
+        return `<option value="${esc(e)}" ${state.adminFilterConsultora===e?'selected':''}>${esc(nome)}</option>`;
+      }).join('')}
+    </select>
+    <select onchange="setAdminFilterStatus(this.value)">
+      <option value="todos">Todos os status</option>
+      ${Object.entries(STATUS_LABELS).map(([v,l])=>`<option value="${v}" ${state.adminFilterStatus===v?'selected':''}>${l}</option>`).join('')}
+    </select>
+  </div>
+
+  <div class="card" style="overflow-x:auto;">
+    ${filtered.length === 0 ? `<div class="empty"><b>Nada por aqui</b>Nenhuma indicação encontrada para esse filtro.</div>` : `
+    <table class="admin-table">
+      <thead><tr><th>Empresa</th><th>Consultora</th><th>Contato</th><th>E-mail</th><th>PIX</th><th>Data</th><th>Status</th><th>Valor a receber</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`}
+  </div>
+  `;
+}
+
+window.setAdminFilterConsultora = function(v){ state.adminFilterConsultora = v; render(); };
+window.setAdminFilterStatus = function(v){ state.adminFilterStatus = v; render(); };
+window.backFromAdmin = function(){ state.screen = state.user ? 'dashboard' : 'login'; render(); };
+
+window.handleStatusChange = async function(id, novoStatus){
+  try{
+    await updateStatusRemote(id, novoStatus);
+    showToast('Status atualizado.');
+  }catch(e){
+    console.error('Falha ao atualizar status:', e);
+    showToast('Não foi possível atualizar agora.');
+  }
+};
+
+window.handleValorChange = async function(id, valor){
+  const num = parseFloat(valor);
+  if(valor !== '' && (isNaN(num) || num < 0)){ showToast('Valor inválido.'); return; }
+  try{
+    await updateValorRemote(id, valor === '' ? null : num);
+    showToast('Valor a receber atualizado.');
+  }catch(e){
+    console.error('Falha ao atualizar valor:', e);
+    showToast('Não foi possível atualizar agora.');
+  }
+};
+
+render();
+</script>
+</body>
+</html>
